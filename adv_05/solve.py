@@ -18,27 +18,22 @@ class SeatDecoder:
 
     def _parse_seat(self):
         seat_code = self.seat_matcher.findall(self.code)[0]
-        range = (0, self.columns_max)
-        for c in seat_code:
-            if c == "L":
-                range = (range[0], (range[1] - math.ceil((range[1]-range[0]) / 2)))
-            if c == "R":
-                range = (math.ceil((range[0] + (range[1]-range[0]) / 2)), range[1])
-
-        assert range[0] == range[1]
-        self.seat = range[0]
+        self.seat = self._close_in(self.columns_max, seat_code, "L", "R")
 
     def _parse_row(self):
         row_code = self.row_matcher.findall(self.code)[0]
-        range = (0, self.rows_max)
-        for c in row_code:
-            if c == "F":
-                range = (range[0], (range[1] - math.ceil((range[1]-range[0]) / 2)))
-            if c == "B":
-                range = (math.ceil((range[0] + (range[1]-range[0]) / 2)), range[1])
+        self.row = self._close_in(self.rows_max, row_code, "F", "B")
+
+    def _close_in(self, max, code, use_lower, use_upper):
+        range = (0, max)
+        for c in code:
+            if c == use_lower:
+                range = (range[0], (range[1] - math.ceil((range[1] - range[0]) / 2)))
+            if c == use_upper:
+                range = (math.ceil((range[0] + (range[1] - range[0]) / 2)), range[1])
 
         assert range[0] == range[1]
-        self.row = range[0]
+        return range[0]
 
 
 with open("input.txt") as file:
